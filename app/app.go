@@ -1,11 +1,12 @@
 package app
 
 import (
+	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/utm-cssc/log/config"
-	"github.com/utm-cssc/log/handler"
 	"gorm.io/gorm"
+	"net"
 	"net/http"
 	"os"
 )
@@ -30,7 +31,7 @@ func (app *App) Init(_ *config.DBConfig) {
 }
 
 func (app *App) setRoutes() {
-	app.Post("/ask-jack", app.Handle(handler.AddQuestionEntry))
+	app.Post("/ask-jack", app.Handle(AddQuestionEntry))
 }
 
 func (app *App) Post(path string, f routeHandler) {
@@ -48,5 +49,14 @@ func (app *App) Run(port string) {
 func (app *App) Handle(h hdlr) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h(app.db, w, r)
+	}
+}
+
+// Handlers
+func AddQuestionEntry(_ *gorm.DB, _ http.ResponseWriter, r *http.Request) {
+	ip, port, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		fmt.Println(ip)
+		fmt.Println(port)
 	}
 }
