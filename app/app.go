@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -54,9 +55,19 @@ func (app *App) Handle(h hdlr) func(w http.ResponseWriter, r *http.Request) {
 
 // Handlers
 func AddQuestionEntry(_ *gorm.DB, _ http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		os.Exit(1)
+	}
+	form := url.Values{}
+	for key, values := range r.PostForm {
+		fmt.Println(key, values)
+		form[key] = values
+	}
+	_, err := http.PostForm("https://formspree.io/xwkrdzyg", form)
 	ip, port, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		fmt.Println(ip)
-		fmt.Println(port)
+		os.Exit(1)
 	}
+	fmt.Println(ip)
+	fmt.Println(port)
 }
