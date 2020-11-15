@@ -30,7 +30,7 @@ func (app *App) Init(_ *config.DBConfig) {
 }
 
 func (app *App) setRoutes() {
-	app.Post("/ask-jack", app.Handle(handler.AskJack))
+	app.Post("/ask-jack", app.Handle(handler.AddQuestionEntry))
 }
 
 func (app *App) Post(path string, f routeHandler) {
