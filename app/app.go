@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/gojp/goreportcard/_repos/src/github.com/2-of-clubs/2ofclubs-server/app/model"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/utm-cssc/log/app/model"
 	"github.com/utm-cssc/log/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 type App struct {
@@ -93,4 +94,15 @@ func AddQuestionEntry(_ *gorm.DB, _ http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(ip)
 	fmt.Println(port)
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		fmt.Println("Port is unprocessable")
+		os.Exit(1)
+	}
+	askJackLog := model.AskJackLog{
+		IP:       ip,
+		Port:     p,
+		Question: form["Question"][0],
+		Email:    form["Email"][0],
+	}
 }
