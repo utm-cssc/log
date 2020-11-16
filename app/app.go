@@ -78,7 +78,7 @@ func (app *App) Handle(h hdlr) func(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handlers
-func AddQuestionEntry(_ *gorm.DB, _ http.ResponseWriter, r *http.Request) {
+func AddQuestionEntry(db *gorm.DB, _ http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		os.Exit(1)
 	}
@@ -104,5 +104,9 @@ func AddQuestionEntry(_ *gorm.DB, _ http.ResponseWriter, r *http.Request) {
 		Port:     p,
 		Question: form["Question"][0],
 		Email:    form["Email"][0],
+	}
+	err = db.Create(&askJackLog).Error
+	if err != nil {
+		fmt.Println("Unable to log request")
 	}
 }
