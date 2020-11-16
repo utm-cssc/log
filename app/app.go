@@ -2,10 +2,14 @@ package app
 
 import (
 	"fmt"
+	"github.com/gojp/goreportcard/_repos/src/github.com/2-of-clubs/2ofclubs-server/app/model"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/utm-cssc/log/config"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -23,12 +27,31 @@ type App struct {
 type routeHandler func(w http.ResponseWriter, r *http.Request)
 type hdlr func(db *gorm.DB, w http.ResponseWriter, r *http.Request)
 
-func (app *App) Init(_ *config.DBConfig) {
+func (app *App) Init(dbConfig *config.DBConfig) {
+	dbFormat :=
+		fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=America/New_York",
+			dbConfig.Host,
+			dbConfig.Port,
+			dbConfig.User,
+			dbConfig.Password,
+			dbConfig.Name,
+		)
+	db, err := gorm.Open(postgres.Open(dbFormat), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	if err != nil {
+		log.Fatal("Unable to connect to database\n", err)
+	}
+	app.db = db
 	app.router = mux.NewRouter()
 	app.origin = handlers.AllowedOrigins([]string{os.Getenv("FRONTEND_URL")})
 	app.methods = handlers.AllowedMethods([]string{http.MethodPost})
 	app.headers = handlers.AllowedHeaders([]string{"Content-Type"})
 	app.setRoutes()
+	log.Println("Connected to Database")
+	if db.Migrator().CreateTable(model.NewAskJackLog()) != nil {
+		log.Println("Base tables not created")
+	}
 }
 
 func (app *App) setRoutes() {
