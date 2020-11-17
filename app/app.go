@@ -78,7 +78,7 @@ func (app *App) Handle(h hdlr) func(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handlers
-func AddQuestionEntry(db *gorm.DB, _ http.ResponseWriter, r *http.Request) {
+func AddQuestionEntry(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		os.Exit(1)
 	}
@@ -88,10 +88,14 @@ func AddQuestionEntry(db *gorm.DB, _ http.ResponseWriter, r *http.Request) {
 		form[key] = values
 	}
 	_, err := http.PostForm("https://formspree.io/xwkrdzyg", form)
+	if err != nil {
+		fmt.Errorf("unable to post form")
+	}
 	ip, port, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		os.Exit(1)
 	}
+	http.Redirect(w, r, "http://localhost:3000/ask-jack", http.StatusSeeOther)
 	fmt.Println(ip)
 	fmt.Println(port)
 	p, err := strconv.Atoi(port)
